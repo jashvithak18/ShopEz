@@ -7,13 +7,16 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Sparkles, 
   Search, 
   Heart, 
   Bell, 
   ChevronDown, 
-  Compass, 
-  MapPin 
+  MapPin,
+  Home as HomeIcon,
+  Truck,
+  Shield,
+  Star,
+  Zap
 } from 'lucide-react';
 import { logout } from '../store/authSlice.js';
 import { clearCart } from '../store/cartSlice.js';
@@ -32,6 +35,7 @@ export default function Navbar() {
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [activeAddress, setActiveAddress] = useState(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const deptRef = useRef(null);
   const notifRef = useRef(null);
@@ -109,11 +113,11 @@ export default function Navbar() {
     <header className="sticky top-0 left-0 right-0 z-50 bg-white border-b border-slate-200/80 shadow-sm w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
-        {/* Left Side: Logo and Active Delivery Location */}
+        {/* Left Side: Logo (click for About) and Active Delivery Location */}
         <div className="flex items-center gap-6 flex-shrink-0">
-          <Link to="/" className="flex items-center">
+          <button onClick={() => setAboutOpen(true)} className="flex items-center focus:outline-none cursor-pointer" title="About ShopEZ">
             <Logo lightMode={true} />
-          </Link>
+          </button>
           {isAuthenticated && (
             <div className="hidden sm:flex items-center gap-1.5 text-left border-l border-slate-200 pl-4 py-1.5">
               <MapPin className="w-4 h-4 text-blue-600" />
@@ -182,14 +186,24 @@ export default function Navbar() {
         {/* Right Side: Navigation & Utilities */}
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
 
-          {/* Explore Catalog link */}
+          {/* Home link */}
           <Link
-            to="/catalog"
+            to="/"
             className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all flex items-center gap-1 font-sans text-xs font-semibold"
-            title="Explore Products"
+            title="Home"
           >
-            <Compass className="w-4.5 h-4.5 text-slate-600 group-hover:text-blue-600" />
-            <span className="hidden lg:inline text-[13px] text-slate-700">Catalog</span>
+            <HomeIcon className="w-4.5 h-4.5 text-slate-600" />
+            <span className="hidden lg:inline text-[13px] text-slate-700">Home</span>
+          </Link>
+
+          {/* Address link */}
+          <Link
+            to="/address"
+            className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all flex items-center gap-1 font-sans text-xs font-semibold"
+            title="My Addresses"
+          >
+            <MapPin className="w-4.5 h-4.5 text-slate-600" />
+            <span className="hidden lg:inline text-[13px] text-slate-700">Address</span>
           </Link>
 
           {/* Notifications Bell */}
@@ -338,8 +352,11 @@ export default function Navbar() {
             </button>
           </form>
 
-          <Link to="/catalog" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3">
-            Discover Catalog
+          <Link to="/" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+            <HomeIcon className="w-5 h-5" /> Home
+          </Link>
+          <Link to="/address" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+            <MapPin className="w-5 h-5" /> My Addresses
           </Link>
           
           {isAuthenticated ? (
@@ -375,6 +392,74 @@ export default function Navbar() {
               Sign In
             </Link>
           )}
+        </div>
+      )}
+
+      {/* About ShopEZ Modal */}
+      {aboutOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setAboutOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+              <button onClick={() => setAboutOpen(false)} className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <svg className="w-6 h-6" viewBox="0 0 100 100" fill="none">
+                    <rect x="20" y="25" width="28" height="50" rx="6" fill="white" fillOpacity="0.9"/>
+                    <rect x="52" y="25" width="28" height="50" rx="6" fill="white" fillOpacity="0.6"/>
+                    <circle cx="50" cy="50" r="8" fill="#1e40af"/>
+                    <circle cx="50" cy="50" r="4" fill="white"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold tracking-tight">Shop<span className="text-blue-200">EZ</span></h2>
+                  <p className="text-blue-200 text-[11px] font-medium">Smarter Shopping, Every Day</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/80 leading-relaxed">
+                ShopEZ is a premium Indian e-commerce platform built to make online shopping fast, personalised, and delightful.
+              </p>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Star,   label: '200+ Products',    sub: 'Curated catalog' },
+                  { icon: Zap,    label: 'Flash Deals',      sub: 'Daily markdowns' },
+                  { icon: Truck,  label: 'Fast Delivery',    sub: 'Pan-India shipping' },
+                  { icon: Shield, label: 'Secure Payments',  sub: 'UPI & encrypted' },
+                ].map(({ icon: Icon, label, sub }) => (
+                  <div key={label} className="flex items-start gap-2.5 bg-slate-50 rounded-xl p-3">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-3.5 h-3.5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">{label}</p>
+                      <p className="text-[10px] text-slate-500">{sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-4 text-xs text-slate-600 space-y-1.5">
+                <p className="font-semibold text-slate-800 text-[11px] uppercase tracking-wider">About Us</p>
+                <p className="leading-relaxed">Founded in Bengaluru, ShopEZ brings together thousands of verified sellers and millions of products across Electronics, Fashion, Home Decor, Beauty, and more.</p>
+                <p className="text-[10px] text-slate-400 pt-1">📍 Sector 5, HSR Layout, Bengaluru, KA 560102 &nbsp;·&nbsp; 📞 1800-123-4567</p>
+              </div>
+
+              <button onClick={() => setAboutOpen(false)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors cursor-pointer">
+                Start Shopping
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </header>

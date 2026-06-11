@@ -14,6 +14,7 @@ import OrderSuccess from './pages/OrderSuccess.jsx';
 import SellerDashboard from './pages/SellerDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import Auth from './pages/Auth.jsx';
+import AddressPage from './pages/AddressPage.jsx';
 import { setCart } from './store/cartSlice.js';
 import { LogoMark } from './components/Logo.jsx';
 
@@ -181,6 +182,7 @@ function App() {
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/address" element={<AddressPage />} />
                 <Route 
                   path="/checkout" 
                   element={
