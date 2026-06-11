@@ -48,32 +48,6 @@ export default function Auth() {
     }
   };
 
-  const handleDevMockGoogle = async () => {
-    setErrorMsg('');
-    setInfoMsg('');
-    setLoading(true);
-    try {
-      dispatch(authStart());
-      const mockEmail = `dev.google.${Math.floor(Math.random() * 10000)}@shopez.com`;
-      const res = await axios.post('/api/auth/google', {
-        isMock: true,
-        email: mockEmail,
-        name: 'Developer Google User',
-        googleId: `mock-google-id-${Math.floor(Math.random() * 10000000)}`
-      });
-      if (res.data.success) {
-        dispatch(authSuccess({ token: res.data.token, user: res.data.user }));
-        navigate('/');
-      }
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Mock Google Login failed';
-      setErrorMsg(msg);
-      dispatch(authFailure(msg));
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     // Only initialize Google button if the GSI script is loaded and we're on login or register screen
     if (typeof window.google !== 'undefined' && (mode === 'login' || mode === 'register')) {
@@ -152,21 +126,21 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-[95vh] mt-16 flex items-center justify-center px-6 py-20 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#EAE6DF] via-[#F7F4EE] to-[#F7F4EE]">
-      <div className="w-full max-w-xl bg-white/70 backdrop-blur-md border border-[#1A1A1A]/5 rounded-[44px] p-10 sm:p-14 shadow-[0_24px_64px_-16px_rgba(26,26,26,0.04)] space-y-10 relative overflow-hidden">
-        <div className="text-center space-y-4">
-          <div className="inline-flex p-4 bg-[#C9A86A]/10 rounded-2xl text-[#C9A86A] mb-2 shadow-inner">
-            <Sparkles className="w-5.5 h-5.5 fill-[#C9A86A]/5" />
+    <div className="min-h-[85vh] mt-8 flex items-center justify-center px-6 py-10 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#EAE6DF] via-[#F7F4EE] to-[#F7F4EE]">
+      <div className="w-full max-w-xl bg-white/70 backdrop-blur-md border border-[#1A1A1A]/5 rounded-[44px] p-8 sm:p-12 shadow-[0_24px_64px_-16px_rgba(26,26,26,0.04)] space-y-7 relative overflow-hidden">
+        <div className="text-center space-y-3">
+          <div className="inline-flex p-3.5 bg-[#C9A86A]/10 rounded-2xl text-[#C9A86A] mb-1 shadow-inner">
+            <Sparkles className="w-5 h-5 fill-[#C9A86A]/5" />
           </div>
           
-          <h2 className="font-display font-light text-4xl sm:text-[42px] tracking-tight text-[#1A1A1A]">
+          <h2 className="font-display font-light text-3xl sm:text-[36px] tracking-tight text-[#1A1A1A]">
             {mode === 'login' && 'Welcome Back'}
             {mode === 'register' && 'Create Your Account'}
             {mode === 'otp' && 'OTP Verification'}
             {mode === 'forgot' && (forgotStep === 'email' ? 'Forgot Password' : 'Verify & Reset')}
           </h2>
           
-          <p className="text-xs sm:text-[14px] text-[#1A1A1A]/40 font-display font-light italic leading-relaxed max-w-md mx-auto">
+          <p className="text-xs sm:text-[13px] text-[#1A1A1A]/40 font-display font-light italic leading-relaxed max-w-md mx-auto">
             {mode === 'login' && 'Sign in to access your customized dashboard, orders, and addresses.'}
             {mode === 'register' && 'Onboard as a custom buyer, merchant seller, or system administrator.'}
             {mode === 'otp' && 'We sent a 6-digit confirmation code to your email.'}
@@ -195,38 +169,38 @@ export default function Auth() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {mode === 'register' && (
             <div className="relative">
-              <User className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <User className="absolute left-5 top-4 w-5 h-5 text-[#1A1A1A]/30" />
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Full Name"
-                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+                className="w-full pl-13 pr-5 py-3.5 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
               />
             </div>
           )}
           
           {(mode !== 'otp' && (mode !== 'forgot' || forgotStep === 'email')) && (
             <div className="relative">
-              <Mail className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <Mail className="absolute left-5 top-4 w-5 h-5 text-[#1A1A1A]/30" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email Address"
-                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+                className="w-full pl-13 pr-5 py-3.5 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
               />
             </div>
           )}
           
           {(mode === 'otp' || (mode === 'forgot' && forgotStep === 'reset')) && (
             <div className="relative">
-              <Key className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <Key className="absolute left-5 top-4 w-5 h-5 text-[#1A1A1A]/30" />
               <input
                 type="text"
                 required
@@ -234,21 +208,21 @@ export default function Auth() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder={mode === 'otp' ? "6-Digit OTP Code" : "6-Digit Reset Code"}
-                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm tracking-[0.5em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all text-[#1A1A1A] placeholder-[#1A1A1A]/30"
+                className="w-full pl-13 pr-5 py-3.5 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm tracking-[0.5em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all text-[#1A1A1A] placeholder-[#1A1A1A]/30"
               />
             </div>
           )}
           
           {(mode === 'login' || mode === 'register' || (mode === 'forgot' && forgotStep === 'reset')) && (
             <div className="relative">
-              <Lock className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <Lock className="absolute left-5 top-4 w-5 h-5 text-[#1A1A1A]/30" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={mode === 'forgot' ? "New Password" : "Password"}
-                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+                className="w-full pl-13 pr-5 py-3.5 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
               />
             </div>
           )}
@@ -259,7 +233,7 @@ export default function Auth() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-xs font-sans font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 text-[#1A1A1A]"
+                className="w-full px-5 py-3.5 bg-white border border-[#1A1A1A]/10 rounded-2xl text-xs font-sans font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 text-[#1A1A1A]"
               >
                 <option value="customer">Customer Buyer</option>
                 <option value="seller">Store Merchant Seller</option>
@@ -271,7 +245,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full bg-[#1A1A1A] hover:bg-[#C9A86A] text-[#F7F4EE] hover:text-[#1A1A1A] text-[13px] font-sans font-medium uppercase tracking-wider transition-all duration-500 shadow-md hover:scale-[1.01] cursor-pointer"
+            className="w-full py-3.5 rounded-full bg-[#1A1A1A] hover:bg-[#C9A86A] text-[#F7F4EE] hover:text-[#1A1A1A] text-[13px] font-sans font-medium uppercase tracking-wider transition-all duration-500 shadow-md hover:scale-[1.01] cursor-pointer"
           >
             {loading ? 'Processing...' : (
               <>
@@ -284,35 +258,10 @@ export default function Auth() {
           </button>
         </form>
 
-        {(mode === 'login' || mode === 'register') && (
-          <div className="space-y-4 pt-4 border-t border-[#1A1A1A]/5">
-            <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
-              <span className="flex-shrink mx-4 text-[10px] text-[#1A1A1A]/30 uppercase tracking-widest font-bold">Or Continue With</span>
-              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
-            </div>
-
-            <div className="flex flex-col gap-3 items-center">
-              {/* Google Native Button Container */}
-              <div id="google-signin-button" className="w-full flex justify-center min-h-[44px]"></div>
-
-              {/* Dev Mock Sign-In */}
-              <button
-                type="button"
-                onClick={handleDevMockGoogle}
-                className="w-full py-3.5 px-4 rounded-2xl border border-dashed border-[#C9A86A]/60 text-[#C9A86A] hover:border-[#C9A86A] hover:bg-[#C9A86A]/5 text-xs font-sans font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              >
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Dev: Google Mock Login
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Premium click-link designs */}
-        <div className="flex flex-col items-center gap-5 pt-6 text-center border-t border-[#1A1A1A]/5">
+        {/* Premium click-link designs (Moved above Google Sign-In) */}
+        <div className="flex flex-col items-center gap-4 pt-4 text-center border-t border-[#1A1A1A]/5">
           {mode === 'login' && (
-            <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-6 text-xs">
+            <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/40 font-bold font-sans">New to ShopEZ?</span>
                 <button 
@@ -355,6 +304,22 @@ export default function Auth() {
             </button>
           )}
         </div>
+
+        {/* Google Sign-in Section (Moved to the very bottom) */}
+        {(mode === 'login' || mode === 'register') && (
+          <div className="space-y-4 pt-4 border-t border-[#1A1A1A]/5">
+            <div className="relative flex py-2 items-center">
+              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
+              <span className="flex-shrink mx-4 text-[10px] text-[#1A1A1A]/30 uppercase tracking-widest font-bold">Or Continue With</span>
+              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
+            </div>
+
+            <div className="flex justify-center min-h-[44px]">
+              {/* Google Native Button Container */}
+              <div id="google-signin-button" className="w-full flex justify-center"></div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
