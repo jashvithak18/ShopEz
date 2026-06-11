@@ -20,6 +20,7 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import { applyCoupon } from './controllers/adminController.js';
 import { protect } from './middlewares/auth.js';
+import fs from 'fs';
 
 // DNS override — run before connectDB to reliably resolve Atlas SRV records
 try { dns.setServers(['8.8.8.8', '1.1.1.1']); } catch (_) {}
@@ -75,15 +76,15 @@ app.get('/api/health', (req, res) => {
 });
 
 // ── Serve React Build in Production ──────────
-if (process.env.NODE_ENV === 'production') {
-  const clientBuild = path.join(__dirname, '..', 'frontend', 'dist');
+const clientBuild = path.join(__dirname, '..', 'frontend', 'dist');
+if (process.env.NODE_ENV === 'production' && fs.existsSync(clientBuild)) {
   app.use(express.static(clientBuild));
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientBuild, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {
-    res.json({ message: 'ShopEZ Premium E-Commerce API is running in development mode.' });
+    res.json({ message: 'ShopEZ Premium E-Commerce API is running.' });
   });
 }
 
