@@ -5,7 +5,6 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
-import AiChatbot from './components/AiChatbot.jsx';
 import Home from './pages/Home.jsx';
 import ProductCatalog from './pages/ProductCatalog.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
@@ -218,7 +217,6 @@ function App() {
               </Routes>
             </main>
             <Footer />
-            <AiChatbot />
           </motion.div>
         )}
       </AnimatePresence>
