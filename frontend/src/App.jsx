@@ -18,7 +18,7 @@ import Auth from './pages/Auth.jsx';
 import { setCart } from './store/cartSlice.js';
 import { LogoMark } from './components/Logo.jsx';
 
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || '';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://shopez-4vgd.onrender.com');
 
 const FloatingSilhouette = ({ children, delay = 0, x = "10%", y = "20%", rotate = 0 }) => (
   <motion.div
