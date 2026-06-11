@@ -43,6 +43,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:5173',
   'http://localhost:5173',
   'http://localhost:3000',
+  'https://shop-ez-lilac.vercel.app',
 ];
 app.use(cors({
   origin: (origin, callback) => {
