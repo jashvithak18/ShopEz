@@ -1,0 +1,237 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
+import { Sparkles, Mail, Lock, User, Key, ShieldAlert } from 'lucide-react';
+import { authStart, authSuccess, authFailure } from '../store/authSlice.js';
+export default function Auth() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [mode, setMode] = useState('login');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('customer');
+  const [otp, setOtp] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [infoMsg, setInfoMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setInfoMsg('');
+    setLoading(true);
+    try {
+      if (mode === 'login') {
+        dispatch(authStart());
+        const res = await axios.post('/api/auth/login', { email, password });
+        if (res.data.success) {
+          dispatch(authSuccess({ token: res.data.token, user: res.data.user }));
+          navigate('/');
+        }
+      } else if (mode === 'register') {
+        const res = await axios.post('/api/auth/register', { name, email, password, role });
+        if (res.data.success) {
+          setInfoMsg(res.data.message);
+          setMode('otp');
+        }
+      } else if (mode === 'otp') {
+        dispatch(authStart());
+        const res = await axios.post('/api/auth/verify-otp', { email, otp });
+        if (res.data.success) {
+          dispatch(authSuccess({ token: res.data.token, user: res.data.user }));
+          navigate('/');
+        }
+      } else if (mode === 'forgot') {
+        const res = await axios.post('/api/auth/forgot-password', { email });
+        if (res.data.success) {
+          setInfoMsg(res.data.message);
+        }
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Something went wrong';
+      setErrorMsg(msg);
+      dispatch(authFailure(msg));
+      if (err.response?.status === 403 && mode === 'login') {
+        setMode('otp');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <div className="min-h-[95vh] mt-16 flex items-center justify-center px-6 py-20 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#EAE6DF] via-[#F7F4EE] to-[#F7F4EE]">
+      <div className="w-full max-w-xl bg-white/70 backdrop-blur-md border border-[#1A1A1A]/5 rounded-[44px] p-10 sm:p-14 shadow-[0_24px_64px_-16px_rgba(26,26,26,0.04)] space-y-10 relative overflow-hidden">
+        <div className="text-center space-y-4">
+          <div className="inline-flex p-4 bg-[#C9A86A]/10 rounded-2xl text-[#C9A86A] mb-2 shadow-inner">
+            <Sparkles className="w-5.5 h-5.5 fill-[#C9A86A]/5" />
+          </div>
+          
+          <h2 className="font-display font-light text-4xl sm:text-[42px] tracking-tight text-[#1A1A1A]">
+            {mode === 'login' && 'Welcome Back'}
+            {mode === 'register' && 'Create Your Account'}
+            {mode === 'otp' && 'OTP Verification'}
+            {mode === 'forgot' && 'Reset Password'}
+          </h2>
+          
+          <p className="text-xs sm:text-[14px] text-[#1A1A1A]/40 font-display font-light italic leading-relaxed max-w-md mx-auto">
+            {mode === 'login' && 'Sign in to access your customized dashboard, orders, and AI preferences.'}
+            {mode === 'register' && 'Onboard as a custom buyer, merchant seller, or system administrator.'}
+            {mode === 'otp' && 'We sent a 6-digit confirmation code to your email.'}
+            {mode === 'forgot' && 'Enter your registered email to receive a recovery link.'}
+          </p>
+        </div>
+
+        {errorMsg && (
+          <div className="p-4 rounded-2xl bg-red-50/40 border border-red-100 text-xs text-red-600 flex items-start gap-3">
+            <ShieldAlert className="w-4.5 h-4.5 text-red-500 shrink-0" />
+            <span className="font-sans font-medium">{errorMsg}</span>
+          </div>
+        )}
+        
+        {infoMsg && (
+          <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100 text-xs text-emerald-600 flex items-start gap-3">
+            <Sparkles className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
+            <span className="font-sans font-medium">{infoMsg}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {mode === 'register' && (
+            <div className="relative">
+              <User className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full Name"
+                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+              />
+            </div>
+          )}
+          
+          {mode !== 'otp' && (
+            <div className="relative">
+              <Mail className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email Address"
+                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+              />
+            </div>
+          )}
+          
+          {mode === 'otp' && (
+            <div className="relative">
+              <Key className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="6-Digit OTP Code"
+                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm tracking-[0.5em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all text-[#1A1A1A] placeholder-[#1A1A1A]/30"
+              />
+            </div>
+          )}
+          
+          {(mode === 'login' || mode === 'register') && (
+            <div className="relative">
+              <Lock className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
+              />
+            </div>
+          )}
+          
+          {mode === 'register' && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-[#1A1A1A]/40 block uppercase tracking-widest font-sans">Register Role</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full px-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-xs font-sans font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 text-[#1A1A1A]"
+              >
+                <option value="customer">Customer Buyer</option>
+                <option value="seller">Store Merchant Seller</option>
+                <option value="admin">System Administrator</option>
+              </select>
+            </div>
+          )}
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-full bg-[#1A1A1A] hover:bg-[#C9A86A] text-[#F7F4EE] hover:text-[#1A1A1A] text-[13px] font-sans font-medium uppercase tracking-wider transition-all duration-500 shadow-md hover:scale-[1.01] cursor-pointer"
+          >
+            {loading ? 'Processing...' : (
+              <>
+                {mode === 'login' && 'Sign In'}
+                {mode === 'register' && 'Register Account'}
+                {mode === 'otp' && 'Verify & Login'}
+                {mode === 'forgot' && 'Send Reset Code'}
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Premium click-link designs */}
+        <div className="flex flex-col items-center gap-5 pt-6 text-center border-t border-[#1A1A1A]/5">
+          {mode === 'login' && (
+            <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-6 text-xs">
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/40 font-bold font-sans">New to ShopEZ?</span>
+                <button 
+                  onClick={() => setMode('register')} 
+                  className="text-[#C9A86A] font-bold hover:text-[#C9A86A]/80 transition-all cursor-pointer underline underline-offset-4 decoration-[#C9A86A]/30 hover:decoration-[#C9A86A] flex items-center gap-1 group font-sans text-[11px] uppercase tracking-wider"
+                >
+                  Create Account <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+                </button>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/40 font-bold font-sans">Lost access?</span>
+                <button 
+                  onClick={() => setMode('forgot')} 
+                  className="text-[#C9A86A] font-bold hover:text-[#C9A86A]/80 transition-all cursor-pointer underline underline-offset-4 decoration-[#C9A86A]/30 hover:decoration-[#C9A86A] font-sans text-[11px] uppercase tracking-wider"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {mode === 'register' && (
+            <div className="w-full flex flex-col items-center gap-1 text-xs">
+              <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/40 font-bold font-sans">Already registered?</span>
+              <button 
+                onClick={() => setMode('login')} 
+                className="text-[#C9A86A] font-bold hover:text-[#C9A86A]/80 transition-all cursor-pointer underline underline-offset-4 decoration-[#C9A86A]/30 hover:decoration-[#C9A86A] flex items-center gap-1 group font-sans text-[11px] uppercase tracking-wider"
+              >
+                Sign In <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+              </button>
+            </div>
+          )}
+          
+          {(mode === 'otp' || mode === 'forgot') && (
+            <button 
+              onClick={() => setMode('login')} 
+              className="text-[#C9A86A] font-bold hover:text-[#C9A86A]/80 transition-all cursor-pointer flex items-center gap-2 group font-sans text-[11px] uppercase tracking-wider"
+            >
+              <span className="group-hover:-translate-x-0.5 transition-transform">&larr;</span> Back to Sign In
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
