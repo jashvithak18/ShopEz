@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Search, SlidersHorizontal, ArrowUpDown, Mic, Star, Heart, ArrowRight, Eye } from 'lucide-react';
 import { CatalogSkeleton } from '../components/SkeletonLoader.jsx';
+
 export default function ProductCatalog() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useSelector(state => state.auth);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +21,62 @@ export default function ProductCatalog() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [voiceSearchActive, setVoiceSearchActive] = useState(false);
+  const [wishlistProductIds, setWishlistProductIds] = useState([]);
+
+  // Sync state with URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const catParam = urlParams.get('category');
+    const searchParam = urlParams.get('search');
+    
+    setCategory(catParam || '');
+    setSearch(searchParam || '');
+  }, [location.search]);
+
+  // Fetch user wishlist if logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      axios.get('/api/wishlist')
+        .then(res => {
+          if (res.data.success && res.data.wishlist?.products) {
+            const ids = res.data.wishlist.products.map(p => typeof p === 'object' ? p._id : p);
+            setWishlistProductIds(ids);
+          }
+        })
+        .catch(err => console.error('Error fetching wishlist:', err));
+    } else {
+      setWishlistProductIds([]);
+    }
+  }, [isAuthenticated]);
+
+  const handleToggleWishlist = async (productId) => {
+    if (!isAuthenticated) {
+      alert('Please login to manage your wishlist.');
+      navigate('/auth');
+      return;
+    }
+    try {
+      const res = await axios.post('/api/wishlist', { productId });
+      if (res.data.success && res.data.wishlist?.products) {
+        const ids = res.data.wishlist.products.map(p => typeof p === 'object' ? p._id : p);
+        setWishlistProductIds(ids);
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+    }
+  };
+
+  const handleCategorySelect = (catIdOrSlug) => {
+    const params = new URLSearchParams(window.location.search);
+    if (catIdOrSlug) {
+      params.set('category', catIdOrSlug);
+    } else {
+      params.delete('category');
+    }
+    params.delete('recommendations'); // clear recommendation flag if standard category selected
+    navigate(`/catalog?${params.toString()}`);
+  };
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -40,6 +102,7 @@ export default function ProductCatalog() {
       setLoading(false);
     }
   }, [search, category, minPrice, maxPrice, sort]);
+
   useEffect(() => {
     axios.get('/api/products/categories')
       .then(res => {
@@ -48,12 +111,14 @@ export default function ProductCatalog() {
         }
       });
   }, []);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchProducts();
     }, 300);
     return () => clearTimeout(delayDebounceFn);
   }, [fetchProducts]);
+
   useEffect(() => {
     if (!search.trim()) {
       setSuggestions([]);
@@ -69,6 +134,7 @@ export default function ProductCatalog() {
     }, 200);
     return () => clearTimeout(delaySuggestions);
   }, [search]);
+
   const startVoiceSearch = () => {
     setVoiceSearchActive(true);
     setTimeout(() => {
@@ -76,6 +142,17 @@ export default function ProductCatalog() {
       setSearch('AeroBook');
     }, 2500);
   };
+
+  // Helper check to see if a category matches active category state (supports id, name or slug matching)
+  const isCategoryActive = (cat) => {
+    if (!category) return false;
+    return (
+      category === cat._id || 
+      category.toLowerCase() === cat.name.toLowerCase() || 
+      category.toLowerCase() === cat.slug?.toLowerCase()
+    );
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-20 mt-16 space-y-16 min-h-screen">
       <div className="space-y-3">
@@ -125,7 +202,8 @@ export default function ProductCatalog() {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
-        <div className="space-y-8 lg:sticky lg:top-28 h-fit">
+        {/* Scrollable Filters Sidebar */}
+        <div className="space-y-8 lg:sticky lg:top-28 h-fit max-h-[calc(100vh-140px)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-black/10">
           <div className="flex items-center gap-2 pb-4 border-b border-black/5">
             <SlidersHorizontal className="w-4 h-4 text-[#2563EB]" />
             <h3 className="font-display font-light text-xl text-[#1A1A1A]">Faceted Filters</h3>
@@ -135,7 +213,7 @@ export default function ProductCatalog() {
             <h4 className="font-sans font-bold text-[10px] uppercase tracking-widest text-[#1A1A1A]/40">Department</h4>
             <div className="flex flex-col gap-2">
               <button 
-                onClick={() => setCategory('')} 
+                onClick={() => handleCategorySelect('')} 
                 className={`text-left text-xs py-2.5 px-3.5 rounded-xl transition-all ${!category ? 'bg-[#1A1A1A] text-[#F7F4EE] font-medium' : 'text-[#1A1A1A]/70 hover:bg-black/5 font-light'}`}
               >
                 All Departments
@@ -143,8 +221,8 @@ export default function ProductCatalog() {
               {categories.map(cat => (
                 <button
                   key={cat._id}
-                  onClick={() => setCategory(cat._id)}
-                  className={`text-left text-xs py-2.5 px-3.5 rounded-xl transition-all ${category === cat._id ? 'bg-[#1A1A1A] text-[#F7F4EE] font-medium' : 'text-[#1A1A1A]/70 hover:bg-black/5 font-light'}`}
+                  onClick={() => handleCategorySelect(cat._id)}
+                  className={`text-left text-xs py-2.5 px-3.5 rounded-xl transition-all ${isCategoryActive(cat) ? 'bg-[#1A1A1A] text-[#F7F4EE] font-medium' : 'text-[#1A1A1A]/70 hover:bg-black/5 font-light'}`}
                 >
                   {cat.name}
                 </button>
@@ -201,10 +279,8 @@ export default function ProductCatalog() {
                   className="bg-white rounded-[32px] overflow-hidden border border-[#1A1A1A]/5 shadow-[0_8px_30px_rgba(26,26,26,0.01)] hover:shadow-[0_24px_48px_rgba(26,26,26,0.03)] transition-all duration-700 hover:-translate-y-1.5 flex flex-col h-full relative group card-premium"
                 >
                   <div className="relative overflow-hidden aspect-square bg-[#F7F4EE]/50 p-6 flex items-center justify-center reflection-sweep">
-                    {/* Shadow behind the product image to give it depth */}
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(26,26,26,0.02)_0%,_transparent_75%)] opacity-60 pointer-events-none" />
                     
-                    {/* Premium image treatment */}
                     <img 
                       src={prod.images[0]} 
                       alt={prod.name} 
@@ -222,10 +298,11 @@ export default function ProductCatalog() {
                     </div>
                     
                     <button 
-                      className="absolute top-4 right-4 p-2.5 rounded-full bg-white/80 hover:bg-white text-[#1A1A1A]/40 hover:text-red-500 transition-all shadow-sm z-10 cursor-pointer"
+                      onClick={() => handleToggleWishlist(prod._id)}
+                      className="absolute top-4 right-4 p-2.5 rounded-full bg-white/80 hover:bg-white text-[#1A1A1A]/40 hover:text-pink-500 transition-all shadow-sm z-10 cursor-pointer"
                       title="Add to Wishlist"
                     >
-                      <Heart className="w-4 h-4" />
+                      <Heart className={`w-4 h-4 transition-colors ${wishlistProductIds.includes(prod._id) ? 'fill-pink-500 text-pink-500' : 'text-[#1A1A1A]/40'}`} />
                     </button>
                   </div>
                   
