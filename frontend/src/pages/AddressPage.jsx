@@ -46,7 +46,17 @@ export default function AddressPage() {
     }
     setSaving(true);
     try {
-      const res = await axios.post('/api/address', form);
+      const payload = {
+        fullName: form.fullName,
+        phone: form.phone,
+        addressLine: form.addressLine1 + (form.addressLine2 ? `, ${form.addressLine2}` : ''),
+        city: form.city,
+        state: form.state,
+        postalCode: form.postalCode,
+        country: form.country,
+        type: form.type
+      };
+      const res = await axios.post('/api/address', payload);
       if (res.data.success) {
         setAddresses(prev => [...prev, res.data.address]);
         setShowForm(false);
@@ -247,7 +257,7 @@ export default function AddressPage() {
                         )}
                       </div>
                       <p className="text-sm text-slate-600 leading-relaxed">
-                        {addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}
+                        {addr.addressLine}
                       </p>
                       <p className="text-sm text-slate-600">
                         {addr.city}, {addr.state} – {addr.postalCode}
