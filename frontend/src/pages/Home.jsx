@@ -160,7 +160,7 @@ function ProductCard({ prod, isWishlisted, onWishlist, onAdd }) {
         )}
       </div>
       <div className="p-3 flex flex-col gap-1.5 flex-grow">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{prod.category}</span>
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{typeof prod.category === 'object' && prod.category !== null ? prod.category.name : prod.category}</span>
         <h4 className="text-xs font-semibold text-slate-800 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">{prod.name}</h4>
         <div className="flex items-center gap-1 mt-0.5">
           {[1,2,3,4,5].map(s => (
