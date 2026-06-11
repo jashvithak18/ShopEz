@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { 
@@ -25,7 +25,13 @@ import { Logo } from './Logo.jsx';
 export default function Navbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { isAuthenticated, user } = useSelector(state => state.auth);
+
+  const isHomeActive = location.pathname === '/';
+  const isAddressActive = location.pathname === '/address';
+  const isWishlistActive = location.pathname === '/catalog' && new URLSearchParams(location.search).get('wishlist') === 'true';
+  const isCartActive = location.pathname === '/cart';
   const { cart } = useSelector(state => state.cart);
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,21 +195,25 @@ export default function Navbar() {
           {/* Home link */}
           <Link
             to="/"
-            className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all flex items-center gap-1 font-sans text-xs font-semibold"
+            className={`p-2 rounded-full transition-all flex items-center gap-1.5 font-sans text-xs font-semibold ${
+              isHomeActive ? 'text-blue-600 bg-blue-50/60 shadow-sm border border-blue-100/30' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
+            }`}
             title="Home"
           >
-            <HomeIcon className="w-4.5 h-4.5 text-slate-600" />
-            <span className="hidden lg:inline text-[13px] text-slate-700">Home</span>
+            <HomeIcon className={`w-4.5 h-4.5 ${isHomeActive ? 'text-blue-600' : 'text-slate-600'}`} />
+            <span className={`hidden lg:inline text-[13px] ${isHomeActive ? 'text-blue-600 font-bold' : 'text-slate-700'}`}>Home</span>
           </Link>
 
           {/* Address link */}
           <Link
             to="/address"
-            className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all flex items-center gap-1 font-sans text-xs font-semibold"
+            className={`p-2 rounded-full transition-all flex items-center gap-1.5 font-sans text-xs font-semibold ${
+              isAddressActive ? 'text-blue-600 bg-blue-50/60 shadow-sm border border-blue-100/30' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
+            }`}
             title="My Addresses"
           >
-            <MapPin className="w-4.5 h-4.5 text-slate-600" />
-            <span className="hidden lg:inline text-[13px] text-slate-700">Address</span>
+            <MapPin className={`w-4.5 h-4.5 ${isAddressActive ? 'text-blue-600' : 'text-slate-600'}`} />
+            <span className={`hidden lg:inline text-[13px] ${isAddressActive ? 'text-blue-600 font-bold' : 'text-slate-700'}`}>Address</span>
           </Link>
 
           {/* Notifications Bell */}
@@ -245,20 +255,26 @@ export default function Navbar() {
 
           {/* Wishlist Link */}
           <Link
-            to="/catalog" // Redirecting to catalog where user can filter by wishlist or search
-            className="p-2 text-slate-600 hover:text-red-500 hover:bg-slate-100 rounded-full transition-all"
+            to="/catalog?wishlist=true"
+            className={`p-2 rounded-full transition-all flex items-center gap-1.5 font-sans text-xs font-semibold ${
+              isWishlistActive ? 'text-pink-600 bg-pink-50/60 shadow-sm border border-pink-100/30' : 'text-slate-600 hover:text-red-500 hover:bg-slate-100'
+            }`}
             title="Wishlist"
           >
-            <Heart className="w-4.5 h-4.5" />
+            <Heart className={`w-4.5 h-4.5 ${isWishlistActive ? 'text-pink-600 fill-pink-500' : 'text-slate-600'}`} />
+            <span className={`hidden lg:inline text-[13px] ${isWishlistActive ? 'text-pink-600 font-bold' : 'text-slate-700'}`}>Wishlist</span>
           </Link>
 
           {/* Cart Bag */}
           <Link 
             to="/cart" 
-            className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-full transition-all relative"
+            className={`p-2 rounded-full transition-all flex items-center gap-1.5 font-sans text-xs font-semibold ${
+              isCartActive ? 'text-blue-600 bg-blue-50/60 shadow-sm border border-blue-100/30' : 'text-slate-600 hover:text-blue-600 hover:bg-slate-100'
+            }`}
             title="Shopping Cart"
           >
-            <ShoppingBag className="w-4.5 h-4.5" />
+            <ShoppingBag className={`w-4.5 h-4.5 ${isCartActive ? 'text-blue-600' : 'text-slate-600'}`} />
+            <span className={`hidden lg:inline text-[13px] ${isCartActive ? 'text-blue-600 font-bold' : 'text-slate-700'}`}>Cart</span>
             {cartCount > 0 && (
               <span className="absolute top-1 right-1 bg-blue-600 text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                 {cartCount}
@@ -352,11 +368,14 @@ export default function Navbar() {
             </button>
           </form>
 
-          <Link to="/" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+          <Link to="/" onClick={() => setMobileOpen(false)} className={`font-sans font-bold text-lg border-b border-slate-100 pb-3 flex items-center gap-2 ${isHomeActive ? 'text-blue-600' : 'text-slate-800'}`}>
             <HomeIcon className="w-5 h-5" /> Home
           </Link>
-          <Link to="/address" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+          <Link to="/address" onClick={() => setMobileOpen(false)} className={`font-sans font-bold text-lg border-b border-slate-100 pb-3 flex items-center gap-2 ${isAddressActive ? 'text-blue-600' : 'text-slate-800'}`}>
             <MapPin className="w-5 h-5" /> My Addresses
+          </Link>
+          <Link to="/catalog?wishlist=true" onClick={() => setMobileOpen(false)} className={`font-sans font-bold text-lg border-b border-slate-100 pb-3 flex items-center gap-2 ${isWishlistActive ? 'text-pink-600' : 'text-slate-800'}`}>
+            <Heart className={`w-5 h-5 ${isWishlistActive ? 'text-pink-600 fill-pink-500' : 'text-slate-500'}`} /> My Wishlist
           </Link>
           
           {isAuthenticated ? (
@@ -371,7 +390,7 @@ export default function Navbar() {
                   Admin Console
                 </Link>
               )}
-              <Link to="/cart" onClick={() => setMobileOpen(false)} className="font-sans font-bold text-lg text-slate-800 border-b border-slate-100 pb-3 flex justify-between">
+              <Link to="/cart" onClick={() => setMobileOpen(false)} className={`font-sans font-bold text-lg border-b border-slate-100 pb-3 flex justify-between ${isCartActive ? 'text-blue-600' : 'text-slate-800'}`}>
                 <span>Shopping Cart</span>
                 <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{cartCount}</span>
               </Link>

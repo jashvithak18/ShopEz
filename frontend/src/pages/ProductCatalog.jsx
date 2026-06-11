@@ -81,9 +81,18 @@ export default function ProductCatalog() {
     setLoading(true);
     try {
       const isRecs = new URLSearchParams(window.location.search).get('recommendations') === 'true';
+      const isWishlist = new URLSearchParams(window.location.search).get('wishlist') === 'true';
       let res;
-      if (isRecs) {
+      if (isWishlist) {
+        res = await axios.get('/api/wishlist');
+        if (res.data.success && res.data.wishlist?.products) {
+          setProducts(res.data.wishlist.products);
+        }
+      } else if (isRecs) {
         res = await axios.get('/api/ai/recommendations');
+        if (res.data.success) {
+          setProducts(res.data.products);
+        }
       } else {
         const params = new URLSearchParams();
         if (search) params.append('search', search);
@@ -92,16 +101,16 @@ export default function ProductCatalog() {
         if (maxPrice) params.append('maxPrice', maxPrice);
         if (sort) params.append('sort', sort);
         res = await axios.get(`/api/products?${params.toString()}`);
-      }
-      if (res.data.success) {
-        setProducts(res.data.products);
+        if (res.data.success) {
+          setProducts(res.data.products);
+        }
       }
     } catch (err) {
       console.error('Error fetching products:', err);
     } finally {
       setLoading(false);
     }
-  }, [search, category, minPrice, maxPrice, sort]);
+  }, [search, category, minPrice, maxPrice, sort, location.search]);
 
   useEffect(() => {
     axios.get('/api/products/categories')
