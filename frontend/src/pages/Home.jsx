@@ -72,10 +72,26 @@ const dealPanels = [
     sub: 'Up to 55% off',
     color: '#fff',
     items: [
-      { label: 'Air conditioners',    img: 'https://images.unsplash.com/photo-1621905252507-b354bc25edac?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Refrigerators',       img: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Microwaves',          img: 'https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Washing machines',    img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=200' },
+      { 
+        label: 'Air conditioners',    
+        img: 'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1621905252507-b354bc25edac?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Refrigerators',       
+        img: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1571175432247-f31d0fa47f3b?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Microwaves',          
+        img: 'https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1578643463396-0997cb5328c1?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Washing machines',    
+        img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&q=80&w=200'
+      },
     ],
     category: 'electronics',
   },
@@ -84,10 +100,26 @@ const dealPanels = [
     sub: null,
     color: '#fff',
     items: [
-      { label: 'Cushion covers & more', img: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Figurines & more',      img: 'https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Home storage',          img: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Lighting solutions',    img: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=200' },
+      { 
+        label: 'Cushion covers & more', 
+        img: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Figurines & more',      
+        img: 'https://images.unsplash.com/photo-1606744824163-985d376605aa?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Home storage',          
+        img: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Lighting solutions',    
+        img: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?auto=format&fit=crop&q=80&w=200'
+      },
     ],
     category: 'home-decor',
   },
@@ -96,10 +128,26 @@ const dealPanels = [
     sub: 'Deals on home essentials',
     color: '#fff',
     items: [
-      { label: 'Cleaning supplies',    img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Bathroom accessories', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Home tools',           img: 'https://images.unsplash.com/photo-1581244904349-86426eff855e?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Wallpapers',           img: 'https://images.unsplash.com/photo-1533158326339-7f3cf2404354?auto=format&fit=crop&q=80&w=200' },
+      { 
+        label: 'Cleaning supplies',    
+        img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Bathroom accessories', 
+        img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Home tools',           
+        img: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1530124560676-acbe3222e92c?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Wallpapers',           
+        img: 'https://images.unsplash.com/photo-1533158326339-7f3cf2404354?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=200'
+      },
     ],
     category: 'accessories',
   },
@@ -108,10 +156,26 @@ const dealPanels = [
     sub: 'ShopEZ Brand Picks & more',
     color: '#fff',
     items: [
-      { label: 'Starting ₹199 | Bedsheets',  img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Starting ₹199 | Curtains',   img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Minimum 40% Off | Ironing',  img: 'https://images.unsplash.com/photo-1489278353717-f57e2b77a01f?auto=format&fit=crop&q=80&w=200' },
-      { label: 'Up to 60% Off | Home Decor', img: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=200' },
+      { 
+        label: 'Starting ₹199 | Bedsheets',  
+        img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Starting ₹199 | Curtains',   
+        img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Minimum 40% Off | Ironing',  
+        img: 'https://images.unsplash.com/photo-1489278353717-f57e2b77a01f?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=200'
+      },
+      { 
+        label: 'Up to 60% Off | Home Decor', 
+        img: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=200',
+        fallback: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=200'
+      },
     ],
     category: 'home-decor',
   },
@@ -124,6 +188,9 @@ const fallbackProducts = [
   { _id: 'mock1', name: 'AeroBook Pro 14', description: 'Futuristic unibody laptop.', basePrice: 99999, rating: 4.9, reviewsCount: 128, discount: 15, images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=600'], category: 'Electronics', seller: { storeName: 'AeroTech Studio' } },
   { _id: 'mock2', name: 'AeroPhone Ultra 15', description: 'Titanium flagship smartphone.', basePrice: 69999, rating: 4.8, reviewsCount: 342, discount: 10, images: ['https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&q=80&w=600'], category: 'Electronics', seller: { storeName: 'AeroTech Studio' } },
   { _id: 'mock3', name: 'AeroPods Max', description: 'Premium over-ear wireless audio.', basePrice: 19999, rating: 4.9, reviewsCount: 84, discount: 25, images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600'], category: 'Electronics', seller: { storeName: 'AeroTech Studio' } },
+  { _id: 'mock_ac', name: 'AeroTemp 1.5 Ton Split AC', description: 'Premium 1.5 Ton 5-Star Split AC with copper condenser, inverter compressor, and smart Wi-Fi control.', basePrice: 35999, rating: 4.8, reviewsCount: 195, discount: 15, images: ['https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&q=80&w=600'], category: 'Electronics', seller: { storeName: 'AeroTech Studio' } },
+  { _id: 'mock_microwave', name: 'AeroWave 25L Convection Microwave', description: '25L Convection Microwave Oven with 150+ auto-cook menus, touch control, and child lock feature.', basePrice: 12999, rating: 4.7, reviewsCount: 142, discount: 20, images: ['https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&q=80&w=600'], category: 'Electronics', seller: { storeName: 'AeroTech Studio' } },
+  { _id: 'mock_tools', name: 'AeroFix 100-Piece Home Tool Kit', description: '100-Piece premium home tool set with cordless drill, hammer, screwdrivers, wrenches, and heavy duty carry case.', basePrice: 2499, rating: 4.6, reviewsCount: 88, discount: 10, images: ['https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=600'], category: 'Accessories', seller: { storeName: 'GearZone' } },
   { _id: 'mock4', name: 'Merino Wool Coat', description: 'Premium warm merino wool coat.', basePrice: 14999, rating: 4.7, reviewsCount: 52, discount: 20, images: ['https://images.unsplash.com/photo-1560343090-f0409e92791a?auto=format&fit=crop&q=80&w=600'], category: 'Fashion', seller: { storeName: 'Studio Threadwork' } },
   { _id: 'mock5', name: 'Mid-Century Desk', description: 'Handcrafted solid walnut desk.', basePrice: 29999, rating: 4.9, reviewsCount: 19, discount: 5, images: ['https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=600'], category: 'Home Decor', seller: { storeName: 'Atelier Maison' } },
   { _id: 'mock6', name: 'Comfort Sneaker', description: 'Performance running shoe.', basePrice: 8999, rating: 4.6, reviewsCount: 164, discount: 30, images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600'], category: 'Fashion', seller: { storeName: 'Studio Threadwork' } },
@@ -375,7 +442,10 @@ export default function Home() {
                         src={item.img}
                         alt={item.label}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        onError={e => { e.target.src = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=200'; }}
+                        onError={e => {
+                          e.target.onerror = null;
+                          e.target.src = item.fallback || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=200';
+                        }}
                       />
                     </div>
                     <p className="text-[10px] text-slate-600 leading-tight line-clamp-2">{item.label}</p>

@@ -86,9 +86,7 @@ export default function Navbar() {
   ];
 
   const notifications = [
-    { id: 1, text: 'Your order for AeroPods Max was shipped!', time: '2 hrs ago', unread: true },
-    { id: 2, text: 'Price drop alert: AeroBook Pro now ₹99,999!', time: '1 day ago', unread: false },
-    { id: 3, text: 'Welcome to the new ShopEZ experience.', time: '2 days ago', unread: false }
+    { id: 1, text: 'Welcome to ShopEZ! Explore our brand new premium e-commerce experience.', time: 'Just now', unread: true }
   ];
 
   const unreadNotifsCount = notifications.filter(n => n.unread).length;

@@ -28,7 +28,10 @@ export const getProducts = async (req, res, next) => {
     } = req.query;
     const query = { isApproved: true };
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
     if (category) {
       // If it looks like a valid ObjectId, use it directly; otherwise resolve by name/slug

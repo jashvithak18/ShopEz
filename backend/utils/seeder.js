@@ -181,9 +181,62 @@ const seedData = async () => {
           { color: 'Camel Brown', size: 'S', price: 14999, stock: 10 },
           { color: 'Camel Brown', size: 'M', price: 14999, stock: 15 }
         ],
-        specifications: [
+         specifications: [
           { name: 'Material', value: '80% Merino Wool, 20% Nylon' },
           { name: 'Care', value: 'Dry Clean Only' }
+        ]
+      },
+      {
+        seller: seller._id,
+        name: 'AeroTemp 1.5 Ton Split AC',
+        description: 'Premium 1.5 Ton 5-Star Split AC with copper condenser, inverter compressor, and smart Wi-Fi control.',
+        basePrice: 35999,
+        category: electronics._id,
+        featured: true,
+        images: [
+          'https://images.unsplash.com/photo-1585338107529-13afc5f02586?auto=format&fit=crop&q=80&w=800'
+        ],
+        variants: [
+          { color: 'White', size: 'Standard', price: 35999, stock: 20 }
+        ],
+        specifications: [
+          { name: 'Capacity', value: '1.5 Ton' },
+          { name: 'Energy Rating', value: '5 Star' }
+        ]
+      },
+      {
+        seller: seller._id,
+        name: 'AeroWave 25L Convection Microwave',
+        description: '25L Convection Microwave Oven with 150+ auto-cook menus, touch control, and child lock feature.',
+        basePrice: 12999,
+        category: electronics._id,
+        featured: true,
+        images: [
+          'https://images.unsplash.com/photo-1585515320310-259814833e62?auto=format&fit=crop&q=80&w=800'
+        ],
+        variants: [
+          { color: 'Black', size: 'Standard', price: 12999, stock: 15 }
+        ],
+        specifications: [
+          { name: 'Capacity', value: '25 L' },
+          { name: 'Type', value: 'Convection' }
+        ]
+      },
+      {
+        seller: seller._id,
+        name: 'AeroFix 100-Piece Home Tool Kit',
+        description: '100-Piece premium home tool set with cordless drill, hammer, screwdrivers, wrenches, and heavy duty carry case.',
+        basePrice: 2499,
+        category: lifestyle._id,
+        images: [
+          'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=800'
+        ],
+        variants: [
+          { color: 'Yellow/Black', size: 'Standard', price: 2499, stock: 30 }
+        ],
+        specifications: [
+          { name: 'Pieces', value: '100' },
+          { name: 'Case Included', value: 'Yes' }
         ]
       }
     ];
