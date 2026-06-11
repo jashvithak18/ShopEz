@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import Cart from '../models/cart.js';
 import Wishlist from '../models/wishlist.js';
+import { OAuth2Client } from 'google-auth-library';
+import { sendEmail } from '../utils/email.js';
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'shopez_super_secret_jwt_key_123456!@#', {
     expiresIn: process.env.JWT_EXPIRE || '7d'
@@ -113,7 +115,33 @@ export const login = async (req, res, next) => {
 };
 export const googleAuth = async (req, res, next) => {
   try {
-    const { email, name, googleId } = req.body;
+    const { credential, isMock, email: mockEmail, name: mockName, googleId: mockGoogleId } = req.body;
+    let email, name, googleId;
+
+    if (isMock && process.env.NODE_ENV !== 'production') {
+      email = mockEmail;
+      name = mockName;
+      googleId = mockGoogleId;
+    } else {
+      if (!credential) {
+        return res.status(400).json({ success: false, message: 'Google credential token is required' });
+      }
+      const clientId = process.env.GOOGLE_CLIENT_ID || '123456789-mock.apps.googleusercontent.com';
+      const client = new OAuth2Client(clientId);
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: clientId
+      });
+      const payload = ticket.getPayload();
+      email = payload.email;
+      name = payload.name;
+      googleId = payload.sub;
+    }
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Could not retrieve email from Google Account' });
+    }
+
     let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
@@ -124,11 +152,21 @@ export const googleAuth = async (req, res, next) => {
       });
       await Cart.create({ user: user._id, items: [] });
       await Wishlist.create({ user: user._id, products: [] });
-    } else if (!user.googleId) {
-      user.googleId = googleId;
-      user.isVerified = true;
-      await user.save();
+    } else {
+      let updated = false;
+      if (!user.googleId) {
+        user.googleId = googleId;
+        updated = true;
+      }
+      if (!user.isVerified) {
+        user.isVerified = true;
+        updated = true;
+      }
+      if (updated) {
+        await user.save();
+      }
     }
+
     const token = generateToken(user._id);
     res.status(200).json({
       success: true,
@@ -141,45 +179,83 @@ export const googleAuth = async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    console.error('Google Auth Error:', error);
+    res.status(400).json({ success: false, message: 'Google Authentication failed: ' + error.message });
   }
 };
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide email address' });
+    }
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found with that email' });
     }
-    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    user.resetPasswordToken = resetToken;
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordToken = resetCode;
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
     await user.save();
-    console.log(`\n--- [ShopEZ Password Reset] ---`);
-    console.log(`To: ${email}`);
-    console.log(`URL: http://localhost:5173/reset-password/${resetToken}`);
-    console.log(`---------------------------------\n`);
-    res.status(200).json({ success: true, message: 'Password reset link outputted to console' });
+
+    const subject = 'ShopEZ Password Reset Verification Code';
+    const text = `Your ShopEZ password reset verification code is: ${resetCode}. It is valid for 10 minutes.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaec; border-radius: 24px; background-color: #ffffff;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h2 style="color: #1a1a1a; margin: 0; font-weight: 300; letter-spacing: -0.5px; font-size: 28px;">ShopEZ</h2>
+          <p style="color: #c9a86a; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin: 5px 0 0 0;">Premium E-Commerce</p>
+        </div>
+        <div style="background-color: #f7f4ee; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px;">
+          <p style="margin: 0 0 10px 0; color: #1a1a1a; font-size: 14px;">Here is your verification code to reset your password:</p>
+          <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #1a1a1a; margin: 15px 0;">${resetCode}</div>
+          <p style="margin: 0; color: #1a1a1a; opacity: 0.4; font-size: 11px; font-style: italic;">This code is valid for 10 minutes.</p>
+        </div>
+        <p style="color: #1a1a1a; font-size: 13px; line-height: 1.6; margin: 0 0 20px 0;">
+          If you did not request a password reset, please ignore this email or contact support if you have security concerns.
+        </p>
+        <hr style="border: 0; border-top: 1px solid #f0f0f2; margin: 20px 0;" />
+        <div style="text-align: center; color: #1a1a1a; opacity: 0.4; font-size: 11px;">
+          &copy; ${new Date().getFullYear()} ShopEZ. All rights reserved.
+        </div>
+      </div>
+    `;
+
+    const emailResult = await sendEmail({ to: email, subject, text, html });
+    let message = 'Password reset verification code sent to your email.';
+    if (emailResult.previewUrl) {
+      message += ` (Development Mode: Ethereal test inbox active)`;
+    }
+
+    res.status(200).json({
+      success: true,
+      message,
+      previewUrl: emailResult.previewUrl
+    });
   } catch (error) {
     next(error);
   }
 };
 export const resetPassword = async (req, res, next) => {
   try {
-    const { token } = req.params;
-    const { password } = req.body;
+    const { email, code, password } = req.body;
+    if (!email || !code || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide email, code, and new password' });
+    }
     const user = await User.findOne({
-      resetPasswordToken: token,
+      email,
+      resetPasswordToken: code,
       resetPasswordExpire: { $gt: Date.now() }
     });
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
     }
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
-    res.status(200).json({ success: true, message: 'Password reset successful' });
+    res.status(200).json({ success: true, message: 'Password reset successful. You can now login.' });
   } catch (error) {
     next(error);
   }

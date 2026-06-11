@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { Sparkles, Mail, Lock, User, Key, ShieldAlert } from 'lucide-react';
 import { authStart, authSuccess, authFailure } from '../store/authSlice.js';
+
 export default function Auth() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [mode, setMode] = useState('login');
+  const [forgotStep, setForgotStep] = useState('email'); // 'email' or 'reset'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +18,81 @@ export default function Auth() {
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Clear messages when mode changes
+  useEffect(() => {
+    setErrorMsg('');
+    setInfoMsg('');
+    setForgotStep('email');
+    setPassword('');
+    setOtp('');
+  }, [mode]);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setErrorMsg('');
+    setInfoMsg('');
+    setLoading(true);
+    try {
+      dispatch(authStart());
+      const res = await axios.post('/api/auth/google', { credential: response.credential });
+      if (res.data.success) {
+        dispatch(authSuccess({ token: res.data.token, user: res.data.user }));
+        navigate('/');
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Google Authentication failed';
+      setErrorMsg(msg);
+      dispatch(authFailure(msg));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDevMockGoogle = async () => {
+    setErrorMsg('');
+    setInfoMsg('');
+    setLoading(true);
+    try {
+      dispatch(authStart());
+      const mockEmail = `dev.google.${Math.floor(Math.random() * 10000)}@shopez.com`;
+      const res = await axios.post('/api/auth/google', {
+        isMock: true,
+        email: mockEmail,
+        name: 'Developer Google User',
+        googleId: `mock-google-id-${Math.floor(Math.random() * 10000000)}`
+      });
+      if (res.data.success) {
+        dispatch(authSuccess({ token: res.data.token, user: res.data.user }));
+        navigate('/');
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Mock Google Login failed';
+      setErrorMsg(msg);
+      dispatch(authFailure(msg));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Only initialize Google button if the GSI script is loaded and we're on login or register screen
+    if (typeof window.google !== 'undefined' && (mode === 'login' || mode === 'register')) {
+      try {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '123456789-mock.apps.googleusercontent.com';
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-button'),
+          { theme: 'outline', size: 'large', width: '380' }
+        );
+      } catch (e) {
+        console.error('Error rendering Google button:', e);
+      }
+    }
+  }, [mode]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -43,9 +120,23 @@ export default function Auth() {
           navigate('/');
         }
       } else if (mode === 'forgot') {
-        const res = await axios.post('/api/auth/forgot-password', { email });
-        if (res.data.success) {
-          setInfoMsg(res.data.message);
+        if (forgotStep === 'email') {
+          const res = await axios.post('/api/auth/forgot-password', { email });
+          if (res.data.success) {
+            setInfoMsg(res.data.message);
+            if (res.data.previewUrl) {
+              console.log(`🔗 [Dev SMTP Mailbox]: ${res.data.previewUrl}`);
+            }
+            setForgotStep('reset');
+            setOtp('');
+            setPassword('');
+          }
+        } else if (forgotStep === 'reset') {
+          const res = await axios.post('/api/auth/reset-password', { email, code: otp, password });
+          if (res.data.success) {
+            setInfoMsg(res.data.message);
+            setMode('login');
+          }
         }
       }
     } catch (err) {
@@ -59,6 +150,7 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-[95vh] mt-16 flex items-center justify-center px-6 py-20 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-[#EAE6DF] via-[#F7F4EE] to-[#F7F4EE]">
       <div className="w-full max-w-xl bg-white/70 backdrop-blur-md border border-[#1A1A1A]/5 rounded-[44px] p-10 sm:p-14 shadow-[0_24px_64px_-16px_rgba(26,26,26,0.04)] space-y-10 relative overflow-hidden">
@@ -71,14 +163,14 @@ export default function Auth() {
             {mode === 'login' && 'Welcome Back'}
             {mode === 'register' && 'Create Your Account'}
             {mode === 'otp' && 'OTP Verification'}
-            {mode === 'forgot' && 'Reset Password'}
+            {mode === 'forgot' && (forgotStep === 'email' ? 'Forgot Password' : 'Verify & Reset')}
           </h2>
           
           <p className="text-xs sm:text-[14px] text-[#1A1A1A]/40 font-display font-light italic leading-relaxed max-w-md mx-auto">
-            {mode === 'login' && 'Sign in to access your customized dashboard, orders, and AI preferences.'}
+            {mode === 'login' && 'Sign in to access your customized dashboard, orders, and addresses.'}
             {mode === 'register' && 'Onboard as a custom buyer, merchant seller, or system administrator.'}
             {mode === 'otp' && 'We sent a 6-digit confirmation code to your email.'}
-            {mode === 'forgot' && 'Enter your registered email to receive a recovery link.'}
+            {mode === 'forgot' && (forgotStep === 'email' ? 'Enter your registered email to receive a 6-digit verification code.' : `Enter the 6-digit code sent to ${email} and your new password.`)}
           </p>
         </div>
 
@@ -92,7 +184,14 @@ export default function Auth() {
         {infoMsg && (
           <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100 text-xs text-emerald-600 flex items-start gap-3">
             <Sparkles className="w-4.5 h-4.5 text-emerald-500 shrink-0" />
-            <span className="font-sans font-medium">{infoMsg}</span>
+            <span className="font-sans font-medium">
+              {infoMsg}
+              {mode === 'forgot' && forgotStep === 'reset' && (
+                <div className="mt-2 font-mono text-[10px] text-emerald-700/80 break-all bg-emerald-50 p-2 rounded-lg">
+                  Check console for Ethereal email test link!
+                </div>
+              )}
+            </span>
           </div>
         )}
 
@@ -111,7 +210,7 @@ export default function Auth() {
             </div>
           )}
           
-          {mode !== 'otp' && (
+          {(mode !== 'otp' && (mode !== 'forgot' || forgotStep === 'email')) && (
             <div className="relative">
               <Mail className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
               <input
@@ -125,7 +224,7 @@ export default function Auth() {
             </div>
           )}
           
-          {mode === 'otp' && (
+          {(mode === 'otp' || (mode === 'forgot' && forgotStep === 'reset')) && (
             <div className="relative">
               <Key className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
               <input
@@ -134,13 +233,13 @@ export default function Auth() {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="6-Digit OTP Code"
+                placeholder={mode === 'otp' ? "6-Digit OTP Code" : "6-Digit Reset Code"}
                 className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm tracking-[0.5em] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all text-[#1A1A1A] placeholder-[#1A1A1A]/30"
               />
             </div>
           )}
           
-          {(mode === 'login' || mode === 'register') && (
+          {(mode === 'login' || mode === 'register' || (mode === 'forgot' && forgotStep === 'reset')) && (
             <div className="relative">
               <Lock className="absolute left-5 top-4.5 w-5 h-5 text-[#1A1A1A]/30" />
               <input
@@ -148,7 +247,7 @@ export default function Auth() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder={mode === 'forgot' ? "New Password" : "Password"}
                 className="w-full pl-13 pr-5 py-4 bg-white border border-[#1A1A1A]/10 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#C9A86A]/15 focus:border-[#C9A86A] transition-all font-sans font-normal placeholder-[#1A1A1A]/30 text-[#1A1A1A]"
               />
             </div>
@@ -179,11 +278,36 @@ export default function Auth() {
                 {mode === 'login' && 'Sign In'}
                 {mode === 'register' && 'Register Account'}
                 {mode === 'otp' && 'Verify & Login'}
-                {mode === 'forgot' && 'Send Reset Code'}
+                {mode === 'forgot' && (forgotStep === 'email' ? 'Send Reset Code' : 'Reset Password')}
               </>
             )}
           </button>
         </form>
+
+        {(mode === 'login' || mode === 'register') && (
+          <div className="space-y-4 pt-4 border-t border-[#1A1A1A]/5">
+            <div className="relative flex py-2 items-center">
+              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
+              <span className="flex-shrink mx-4 text-[10px] text-[#1A1A1A]/30 uppercase tracking-widest font-bold">Or Continue With</span>
+              <div className="flex-grow border-t border-[#1A1A1A]/5"></div>
+            </div>
+
+            <div className="flex flex-col gap-3 items-center">
+              {/* Google Native Button Container */}
+              <div id="google-signin-button" className="w-full flex justify-center min-h-[44px]"></div>
+
+              {/* Dev Mock Sign-In */}
+              <button
+                type="button"
+                onClick={handleDevMockGoogle}
+                className="w-full py-3.5 px-4 rounded-2xl border border-dashed border-[#C9A86A]/60 text-[#C9A86A] hover:border-[#C9A86A] hover:bg-[#C9A86A]/5 text-xs font-sans font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Dev: Google Mock Login
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Premium click-link designs */}
         <div className="flex flex-col items-center gap-5 pt-6 text-center border-t border-[#1A1A1A]/5">

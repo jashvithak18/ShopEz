@@ -8,6 +8,6 @@ router.post('/verify-otp', verifyOtp);
 router.post('/login', authLimiter, login);
 router.post('/google', googleAuth);
 router.post('/forgot-password', forgotPassword);
-router.post('/reset-password/:token', resetPassword);
+router.post('/reset-password', resetPassword);
 router.get('/me', protect, getMe);
 export default router;
