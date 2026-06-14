@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -18,6 +18,7 @@ export default function Auth() {
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const googleInitializedRef = useRef(false);
 
   // Clear messages when mode changes
   useEffect(() => {
@@ -53,14 +54,25 @@ export default function Auth() {
     if (typeof window.google !== 'undefined' && (mode === 'login' || mode === 'register')) {
       try {
         const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '123456789-mock.apps.googleusercontent.com';
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleGoogleCredentialResponse,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('google-signin-button'),
-          { theme: 'outline', size: 'large', width: '380' }
-        );
+        if (!googleInitializedRef.current) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleCredentialResponse,
+          });
+          googleInitializedRef.current = true;
+        }
+        
+        const renderBtn = () => {
+          const btnEl = document.getElementById('google-signin-button');
+          if (btnEl) {
+            window.google.accounts.id.renderButton(
+              btnEl,
+              { theme: 'outline', size: 'large', width: '380' }
+            );
+          }
+        };
+        renderBtn();
+        setTimeout(renderBtn, 50);
       } catch (e) {
         console.error('Error rendering Google button:', e);
       }
