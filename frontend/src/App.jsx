@@ -17,6 +17,7 @@ import Auth from './pages/Auth.jsx';
 import AddressPage from './pages/AddressPage.jsx';
 import { setCart } from './store/cartSlice.js';
 import { LogoMark } from './components/Logo.jsx';
+import { logout } from './store/authSlice.js';
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://shopez-4vgd.onrender.com');
 
@@ -46,6 +47,23 @@ function App() {
   const { token, isAuthenticated, user } = useSelector(state => state.auth);
   const [booting, setBooting] = useState(true);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+
+  // Axios response interceptor for 401 Unauthorized (invalid/expired tokens)
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response && error.response.status === 401) {
+          dispatch(logout());
+          delete axios.defaults.headers.common['Authorization'];
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [dispatch]);
   
   const loadingMessages = [
     'Finding products you’ll love…',
