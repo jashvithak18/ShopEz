@@ -48,20 +48,34 @@ function App() {
   const [booting, setBooting] = useState(true);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
 
-  // Axios response interceptor for 401 Unauthorized (invalid/expired tokens)
+  // Axios request and response interceptors to handle dynamic token inclusion and expired tokens
   useEffect(() => {
-    const interceptor = axios.interceptors.response.use(
+    // Request interceptor to dynamically inject the token
+    const reqInterceptor = axios.interceptors.request.use(
+      config => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+          config.headers['Authorization'] = `Bearer ${storedToken}`;
+        }
+        return config;
+      },
+      error => Promise.reject(error)
+    );
+
+    // Response interceptor to handle expired tokens (401 Unauthorized)
+    const resInterceptor = axios.interceptors.response.use(
       response => response,
       error => {
         if (error.response && error.response.status === 401) {
           dispatch(logout());
-          delete axios.defaults.headers.common['Authorization'];
         }
         return Promise.reject(error);
       }
     );
+
     return () => {
-      axios.interceptors.response.eject(interceptor);
+      axios.interceptors.request.eject(reqInterceptor);
+      axios.interceptors.response.eject(resInterceptor);
     };
   }, [dispatch]);
   
@@ -75,7 +89,6 @@ function App() {
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       axios.get('/api/cart')
         .then(res => {
           if (res.data.success) {
@@ -83,8 +96,6 @@ function App() {
           }
         })
         .catch(err => console.error('Error fetching cart:', err));
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
     }
   }, [token, dispatch]);
 
